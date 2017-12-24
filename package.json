@@ -15,6 +15,7 @@
   "author": "Rogério Munhoz (@rjmunhoz)",
   "license": "MIT",
   "dependencies": {
+    "awilix": "^3.0.0",
     "node-telegram-bot-api": "^0.30.0"
   },
   "devDependencies": {
