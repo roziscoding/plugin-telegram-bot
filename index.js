@@ -6,10 +6,11 @@ process.env.NTBA_FIX_319 = true
 const debug = require('debug')('plugin-telegram-bot:startup:debug')
 
 const TelegramBot = require('node-telegram-bot-api')
+const {container, asValue} = require('./configureContainer')
 const config = require('./config')
 
 debug('loading commands')
-const commands = require('./lib/loadCommands')()
+const commands = container.cradle.commands
 debug(`${commands.length} commands loaded`)
 debug('loading handlers')
 const handlers = require('./lib/loadHandlers')()
@@ -27,12 +28,23 @@ debug('Settings commands up')
 commands.forEach(command => {
   bot.onText(command.regex, async (msg, args) => {
     try {
-      const result = await command.run(msg, args)
+      const scope = container.createScope()
+      scope.register('msg', asValue(msg))
+      const result = await command.run(msg, args, scope.cradle)
       const handler = handlers.get(result.type)
       await handler(msg, result, bot)
     } catch (err) {
-      console.error(err)
+      const MissingParamsError = container.cradle.MissingParamsError
+      const isMissingParams = err instanceof MissingParamsError
+
+      if (isMissingParams) {
+        const text = `Você não informou os parâmetros a seguir: ${err.params.map(x => `\`${x}\``)}`
+        return bot.sendMessage(msg.chat.id, text, {parse_mode: 'Markdown'})
+          .catch(console.error)
+      }
+
       bot.sendMessage(msg.chat.id, `Erro ao processar o comando: ${err}`)
+        .catch(console.error)
     }
   })
 })
