@@ -4,17 +4,13 @@
 process.env.NTBA_FIX_319 = true
 
 const debug = require('debug')('plugin-telegram-bot:startup:debug')
+const pipeline = require('simple-middleware-manager').default()
+const setupPipeline = require('./middlewares')
+setupPipeline(pipeline)
 
 const TelegramBot = require('node-telegram-bot-api')
-const {container, asValue} = require('./configureContainer')
-const config = require('./config')
-
-debug('loading commands')
-const commands = container.cradle.commands
-debug(`${commands.length} commands loaded`)
-debug('loading handlers')
-const handlers = require('./lib/loadHandlers')()
-debug(`${handlers.size} handlers loaded`)
+const { container } = require('./configureContainer')
+const { config, commands } = container.cradle
 
 debug('Creating bot instance')
 const bot = new TelegramBot(config.bot.API_TOKEN, {
@@ -27,25 +23,17 @@ const bot = new TelegramBot(config.bot.API_TOKEN, {
 debug('Settings commands up')
 commands.forEach(command => {
   bot.onText(command.regex, async (msg, args) => {
-    try {
-      const scope = container.createScope()
-      scope.register('msg', asValue(msg))
-      const result = await command.run(msg, args, scope.cradle)
-      const handler = handlers.get(result.type)
-      await handler(msg, result, bot)
-    } catch (err) {
-      const MissingParamsError = container.cradle.MissingParamsError
-      const isMissingParams = err instanceof MissingParamsError
+    debug(`Got text ${msg.text}`)
+    debug(`Matched command ${command.name}`)
+    const error = err => pipeline.trigger('onError', {
+      bot,
+      err,
+      msg,
+      command,
+      cradle: container.cradle
+    })
 
-      if (isMissingParams) {
-        const text = `Você não informou os parâmetros a seguir: ${err.params.map(x => `\`${x}\``)}`
-        return bot.sendMessage(msg.chat.id, text, {parse_mode: 'Markdown'})
-          .catch(console.error)
-      }
-
-      bot.sendMessage(msg.chat.id, `Erro ao processar o comando: ${err}`)
-        .catch(console.error)
-    }
+    pipeline.trigger('onCommand', {msg, args, container, command, bot, error})
   })
 })
 
