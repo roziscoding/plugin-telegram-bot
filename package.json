@@ -4,7 +4,8 @@
   "description": "Telegram bot boilerplate, made to work with commands as plugins",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "start": "node index.js"
   },
   "keywords": [
     "node",
