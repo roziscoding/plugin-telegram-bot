@@ -16,7 +16,8 @@
   "license": "MIT",
   "dependencies": {
     "awilix": "^3.0.0",
-    "node-telegram-bot-api": "^0.30.0"
+    "node-telegram-bot-api": "^0.30.0",
+    "simple-middleware-manager": "0.0.1"
   },
   "devDependencies": {
     "chai": "^4.1.2",
