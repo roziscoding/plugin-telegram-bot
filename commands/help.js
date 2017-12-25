@@ -15,7 +15,7 @@ module.exports = {
   name: 'help',
   regex: /\/help ?(.*)/,
   helpText: 'Exibe esta mensagem',
-  run (msg, args, {commands}) {
+  async run (msg, args, {commands}) {
     return {
       type: 'text',
       text: renderHelp(commands),
