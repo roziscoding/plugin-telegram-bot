@@ -1,8 +1,9 @@
 module.exports = {
-  name: 'Echo',
-  regex: /\/echo (.*)/,
+  name: 'echo',
+  regex: /\/echo ?(.*)/,
   helpText: 'Echo anything you say, markdown formatted',
-  async run (msg, args) {
+  async run (msg, args, { MissingParamsError }) {
+    if (!args[1]) throw new MissingParamsError(['texto'])
     return {
       type: 'text',
       text: args[1],
