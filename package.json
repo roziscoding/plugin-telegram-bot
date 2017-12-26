@@ -17,6 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "awilix": "^3.0.0",
+    "mongoose": "^4.13.7",
     "node-telegram-bot-api": "^0.30.0",
     "simple-middleware-manager": "0.0.1"
   },
