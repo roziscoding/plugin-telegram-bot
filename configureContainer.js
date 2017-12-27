@@ -1,5 +1,6 @@
 const { createContainer, asValue, asClass } = require('awilix')
 const Session = require('./lib/session')
+const Database = require('./lib/db')
 const config = require('./config')
 
 const container = createContainer()
@@ -17,5 +18,9 @@ container.loadModules(['lib/errors/**/*.js'], {
 container.register('session', asClass(Session))
 
 container.register('config', asValue(config))
+
+container.register('database', asClass(Database))
+
+container.loadModules(['lib/db/models'], { formatName: x => `${x}Model` })
 
 module.exports = {container, asValue}

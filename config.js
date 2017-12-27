@@ -6,4 +6,8 @@ const bot = {
   API_TOKEN: process.env.API_TOKEN
 }
 
-module.exports = { bot }
+const db = {
+  CONNSTRING: process.env.DB_CONNSTRING || 'mongodb://localhost/pluginbot'
+}
+
+module.exports = { bot, db }
